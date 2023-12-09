@@ -6,19 +6,21 @@ import math
 
 class SearchDriver:
     def __init__(self, board, active, value_network, policy_network,
-                 expansion_factor, simulation_depth):
+                 expansion_factor, simulation_depth, exploration_factor):
         self.board_ = board
         self.active_ = active
         self.value_network_ = value_network
         self.policy_network_ = policy_network
         self.expansion_factor_ = expansion_factor
         self.simulation_depth_ = simulation_depth
+        self.exploration_factor_ = exploration_factor
         self.size_ = 9
+        self.root_ = None
 
     def mcts_suggest(self):
-        root_state = BoardState(self.board_, self.active_, self.size_)
-        root = SearchNode(root_state, self.value_network_, self.policy_network_)
-        cur = root
+        root_state = BoardState(self.size_, None, self.board_, self.active_)
+        self.root_ = SearchNode(None, root_state, 0)
+        cur = self.root_
         level = 0
         while level < self.simulation_depth_:
             level += 1
@@ -54,13 +56,13 @@ class SearchDriver:
                 self.evaluate(child)
             added_score, added_children = cur.reeval_leaf()
             if cur == self.root_:
-                return
+                continue
             cur = cur.ascend()
             while cur != self.root_ and cur is not None:
                 cur.reevaluate(added_score, added_children)
                 cur = cur.ascend()
         
-        return self.child_scores(root)
+        return self.child_scores(self.root_)
     
     def exploration_score(self, parent: SearchNode, child: SearchNode) -> float:
         scalar = self.exploration_factor_ * child.policy_score()
@@ -71,7 +73,7 @@ class SearchDriver:
         move_strengths = self.policy_eval(cur)
         i = 0
         candidates = []
-        while i < len(move_strengths) and len(candidates) < self.expansion_limit_:
+        while i < len(move_strengths) and len(candidates) < self.expansion_factor_:
             move = move_strengths[i][1]
             result = cur.state().next_move(move)
             if result is not None:

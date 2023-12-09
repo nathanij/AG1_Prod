@@ -5,7 +5,7 @@ from typing import List, Optional, Set, Tuple, Type
 
 class BoardState:
     # TODO: change constructor
-    def __init__(self, size = 19, prev = None):
+    def __init__(self, size = 19, prev = None, board = None, active = None):
         self.size_ = size
 
         if prev is not None:
@@ -14,13 +14,19 @@ class BoardState:
             self.active_ = prev.active_ 
             self.pass_count_ = prev.pass_count_
             self.score_ = deepcopy(prev.score_)
+
+        elif board is not None:
+            self.board_ = deepcopy(board)
+            self.parent_ = None
+            self.active_ = active
+            self.pass_count_ = 0
+            self.score_ = [0,0]
             
         else:
             row, col = random.randint(0, self.size_ - 1), random.randint(0, self.size_ - 1)
             # TODO: randomize multiple moves after testing (first 4 moves)
             self.board_ = [[0.5] * size for _ in range(size)] # 0 for black, 1 for white
             self.board_[row][col] = 0  # randomized first move
-            self.prev_states_ = set()
             self.active_ = 1 # white moves post-randomization
             self.pass_count_ = 0
             self.score_ = [0,0]
