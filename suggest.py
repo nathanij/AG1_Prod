@@ -3,8 +3,8 @@ import math
 
 
 def suggest(board, active, value_network, policy_network):
-    expansion_factor = 5
-    simulation_depth = 20
+    expansion_factor = 6
+    simulation_depth = 25
     exploration_factor = math.sqrt(2) / 8 
     driver = SearchDriver(board, active, value_network, policy_network,
                       expansion_factor, simulation_depth, exploration_factor)
